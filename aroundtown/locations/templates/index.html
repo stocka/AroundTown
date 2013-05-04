@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Around Town</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>	
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key={{ map_settings.key }}&sensor=false"></script>	
+	<script type="text/javascript">
+
+		var map;
+		var markers = {};
+		var locationInfo;
+
+		function getLocation(id) {
+			$.ajax({
+			    url: '{% url 'detail' 99999 %}'.replace('99999', id.toString()),
+			    dataType : 'json',
+			    cache: false,
+			    success: function(data) {
+			    		locationInfo.html('');
+			    		$('<h2 />').text(data.name).appendTo(locationInfo);
+			    		if( data.address ) {
+			    			$('<div />').text(data.address).appendTo(locationInfo);
+			    		}
+			    		if( data.last_visited ) {
+			    			$('<div />').text(data.last_visited).appendTo(locationInfo);
+			    		}
+
+			    		if( data.visits ) {
+			    			for( var i = 0; i < data.visits.length; i+=1) {
+			    				var visit = data.visits[i];
+			    				var visitContainer = $('<div class="visit" />').appendTo(locationInfo);
+
+			    				$("<h3 />").text(visit.date).appendTo(visitContainer);
+			    				$("<div />").text(visit.rating).appendTo(visitContainer);
+			    				if ( visit.writeup ) {
+			    					$("<blockquote />").text(visit.writeup).appendTo(visitContainer);
+			    				}
+
+			    			}
+			    		}
+			    }
+			});
+
+		}		
+
+		function initialize() {
+      var mapOptions = {
+        center: new google.maps.LatLng({{ map_settings.latitude }}, {{ map_settings.longitude }}),
+        zoom: {{ map_settings.zoom }},
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+
+      map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+  	{% for location in locations %}
+      markers[{{ location.id }}] = new google.maps.Marker({
+		      position: new google.maps.LatLng({{ location.latitude }}, {{ location.longitude }}),
+		      map: map,
+		      title: '{{ location.name|escapejs }}'
+		  });
+		  google.maps.event.addListener(markers[{{ location.id }}], 'click', function () {
+		  	getLocation({{ location.id }});
+		  });		  
+  	{% endfor %}
+
+			// Cache selectors.
+			locationInfo = $("#location-info").appendTo("body");
+		}
+
+	</script>
+	<style type="text/css">
+		html, body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+		}
+	  #map-canvas { 
+	  	position: absolute;
+	  	top: 0;
+	  	right: 300px;
+	  	bottom: 0;
+	  	left: 0;
+	  }
+	  #location-info {
+	  	position: absolute;
+	  	width: 300px; 
+	  	top: 0;
+	  	right: 0;
+	  	bottom: 0;
+	  }
+	  #location-info * {
+	  	margin-left: 10px;
+	  	margin-right: 10px;
+	  }
+	</style>
+</head>
+<body onload="initialize();">
+	<div id="location-info">
+		<h2>Select a location to get more information.</h2>
+	</div>	
+	<div id="map-canvas" />
+</body>
+</html>

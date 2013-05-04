@@ -159,4 +159,10 @@ LOGGING = {
     }
 }
 
+# Defaults for the initial Google Map positioning/zoom
+# Reference: https://developers.google.com/maps/documentation/javascript/tutorial#MapOptions
+DEFAULT_MAP_ZOOM = 8
+DEFAULT_MAP_LATITUDE = 39.961176
+DEFAULT_MAP_LONGITUDE = -82.998794
+
 from local_settings import *
