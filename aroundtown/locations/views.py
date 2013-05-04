@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.utils import simplejson, formats
+from django.utils import simplejson
 from django.shortcuts import render
 from aroundtown import mapsettings
 from locations.models import Location
@@ -21,11 +21,11 @@ def detail(request, location_id):
 		}
 
 		if location.last_visited_date:
-			to_json["last_visited"] = formats.date_format(location.last_visited_date, "SHORT_DATETIME_FORMAT")
+			to_json["last_visited"] = location.last_visited_date.strftime('%x')
 
 		for visit in visits:
 			to_json['visits'].append({
-				"date": formats.date_format(visit.visit_date, "SHORT_DATETIME_FORMAT"),
+				"date": visit.visit_date.strftime('%x'),
 				"rating": str(visit.rating) + ' - ' + str(visit.RATINGS[visit.rating][1]),
 				"writeup": visit.writeup
 			})
